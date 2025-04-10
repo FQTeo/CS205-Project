@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Deadlock Puzzle</string>
+    <string name="title">Deadlock Puzzle</string>
+    <string name="select_difficulty">Select Difficulty Level:</string>
+    <string name="easy">Easy (3 monsters, 30 seconds)</string>
+    <string name="medium">Medium (5 monsters, 45 seconds)</string>
+    <string name="hard">Hard (8 monsters, 60 seconds)</string>
+    <string name="start_game">Start Game</string>
+    <string name="restart">New Game</string>
+    <string name="run">RUN</string>
+    <string name="success">Success! No deadlock detected.</string>
+    <string name="deadlock">Deadlock detected! Try a different order.</string>
+    <string name="timeout">Time\'s up! You need to be faster.</string>
+    <string name="instructions">Instructions: Rearrange the monsters to prevent deadlock. Each monster holds a resource and needs another to complete its task. Avoid circular dependencies to solve the puzzle!</string>
+</resources>
