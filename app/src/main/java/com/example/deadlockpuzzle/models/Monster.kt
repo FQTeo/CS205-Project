@@ -175,6 +175,15 @@ object MonsterFactory {
      * that guarantee at least one possible deadlock-free arrangement
      */
     private fun createMonsters(count: Int): List<Monster> {
+        if (count <= 0) {
+            throw IllegalArgumentException("Monster count must be positive, received: $count")
+        }
+        
+        // Make sure we have enough resources for the requested monster count
+        if (count > resources.size) {
+            throw IllegalArgumentException("Not enough resource types for $count monsters. Maximum is ${resources.size}")
+        }
+        
         val monsters = mutableListOf<Monster>()
         val usedResources = resources.take(count).toMutableList()
         usedResources.shuffle()
@@ -202,10 +211,26 @@ object MonsterFactory {
         }
 
         // For easier difficulties, always ensure at least one valid solution
-        if (count <= 5) {
+        if (count <= 5 && count >= 2) {
             // Break one dependency in the chain
             val breakIndex = (0 until count).random()
-            val freeResource = resources[count] // Use a resource outside the chain
+            // Use a resource outside the chain if available, or a random one if not
+            val freeResource = if (count < resources.size) {
+                resources[count] // Use a resource outside the chain
+            } else {
+                // In case we're using all resources, pick a random one that doesn't create a direct deadlock
+                val currentMonster = monsters[breakIndex]
+                val resourcesExcludingCurrent = resources.filter { 
+                    it != currentMonster.heldResourceId && it != currentMonster.neededResourceId 
+                }
+                if (resourcesExcludingCurrent.isNotEmpty()) {
+                    resourcesExcludingCurrent.random()
+                } else {
+                    // Last resort - just pick any resource since we can't avoid all conflicts
+                    resources.random()
+                }
+            }
+            
             monsters[breakIndex] = monsters[breakIndex].copy(
                 neededResourceId = freeResource
             )
