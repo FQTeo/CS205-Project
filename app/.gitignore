@@ -1,1 +1,5 @@
+# Ignore app-specific build files
 /build
+
+# Ignore any app-specific files that shouldn't be in version control
+# Note: Most ignores are handled by the root .gitignore file
