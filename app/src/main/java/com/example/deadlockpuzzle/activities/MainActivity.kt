@@ -466,6 +466,41 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+//
+//    private fun observeTimerUpdates() {
+//        // Observe timer updates
+//        timerManager.remainingTime.observe(this) { timeRemaining ->
+//            updateTimerDisplay(timeRemaining)
+//
+//            // Check if time ran out
+//            if (timeRemaining <= 0) {
+//                lifecycleScope.launch {
+//                    timerManager.stopTimer()
+//
+//                    // Use background message handler to process game over
+//                    backgroundMessageHandler.queueGameLogicProcessing(viewModel.gameLogic)
+//
+//                    // Show failure animation
+//                    gameView.showFailureAnimation()
+//
+//                    // Vibrate device
+//                    vibrateDevice()
+//
+//                    // Play failure sound
+//                    soundManager.playFailureSound()
+//
+//                    // Show timeout modal instead of regular game results
+//                    showTimeoutModal()
+//                }
+//            }
+//        }
+//
+//        // Observe game state changes
+//        viewModel.monsters.observe(this) { monsters ->
+//            // Update game state in GameView
+//            gameView.updateGameState(monsters)
+//        }
+//    }
 
     private fun observeTimerUpdates() {
         // Observe timer updates
@@ -476,21 +511,37 @@ class MainActivity : AppCompatActivity() {
             if (timeRemaining <= 0) {
                 lifecycleScope.launch {
                     timerManager.stopTimer()
-                    
-                    // Use background message handler to process game over
-                    backgroundMessageHandler.queueGameLogicProcessing(viewModel.gameLogic)
-                    
-                    // Show failure animation
-                    gameView.showFailureAnimation()
-                    
-                    // Vibrate device
-                    vibrateDevice()
-                    
-                    // Play failure sound
-                    soundManager.playFailureSound()
-                    
-                    // Show timeout modal instead of regular game results
-                    showTimeoutModal()
+
+                    // Check for deadlock first using viewModel
+                    val isDeadlocked = withContext(Dispatchers.Default) {
+                        !viewModel.runGame() // runGame returns true if deadlock-free
+                    }
+
+                    if (isDeadlocked) {
+                        // Use background message handler to process game over
+                        backgroundMessageHandler.queueGameLogicProcessing(viewModel.gameLogic)
+
+                        // Show failure animation
+                        gameView.showFailureAnimation()
+
+                        // Vibrate device
+                        vibrateDevice()
+
+                        // Play failure sound
+                        soundManager.playFailureSound()
+
+                        // Show timeout modal instead of regular game results
+                        showTimeoutModal()
+                    } else {
+                        // If no deadlock, show success animation and results
+                        gameView.showSuccessAnimation()
+
+                        // Play success sound
+                        soundManager.playSuccessSound()
+
+                        // Show success game results
+                        showGameResults(true)
+                    }
                 }
             }
         }
