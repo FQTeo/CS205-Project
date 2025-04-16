@@ -169,7 +169,6 @@ class GameView(
      */
     private fun setupIntervalTasks() {
         intervalManager?.let { manager ->
-            // Add a task to update background effects every 100ms
             if (!manager.hasTask("backgroundEffects")) {
                 manager.addTask("backgroundEffects", 100, true) {
                     backgroundEffectTime += 0.1f
@@ -177,8 +176,7 @@ class GameView(
                     invalidate()
                 }
             }
-            
-            // Add a task to emit ambient particles every 500ms
+
             if (!manager.hasTask("ambientParticles")) {
                 manager.addTask("ambientParticles", 500, false) {
                     if (width > 0 && height > 0) {
@@ -206,17 +204,16 @@ class GameView(
      */
     private fun updateBackgroundShader() {
         if (width <= 0 || height <= 0) return
-        
-        // Create a gradient background that shifts over time
+
         val centerX = width / 2f + sin(backgroundEffectTime * 0.2f) * width * 0.1f
         val centerY = height / 2f + sin(backgroundEffectTime * 0.3f) * height * 0.1f
         
         backgroundShader = RadialGradient(
             centerX, centerY, width * 0.8f,
             intArrayOf(
-                Color.rgb(250, 250, 255), // Almost white in center
-                Color.rgb(240, 245, 255), // Very light blue
-                Color.rgb(230, 240, 255)  // Light blue at edges
+                Color.rgb(250, 250, 255),
+                Color.rgb(240, 245, 255),
+                Color.rgb(230, 240, 255)
             ),
             floatArrayOf(0f, 0.5f, 1f),
             Shader.TileMode.CLAMP
@@ -229,10 +226,7 @@ class GameView(
      * Loads monster and resource graphics
      */
     private fun loadResources() {
-        // In a real app, you'd load actual graphics
-        // For this example, we'll create colored squares as placeholder graphics
-        
-        // Create placeholder monster bitmaps (would be replaced with actual graphics)
+        // Create placeholder monster bitmaps
         val monsterColors = listOf(
             Color.rgb(255, 100, 100),  // Red
             Color.rgb(100, 255, 100),  // Green
@@ -245,7 +239,6 @@ class GameView(
         )
         
         val tempBitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)
-        val tempCanvas = Canvas(tempBitmap)
         
         monsterColors.forEachIndexed { index, color ->
             val monsterBitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)
@@ -296,92 +289,78 @@ class GameView(
                         // Star tip
                         paint.color = Color.YELLOW
                         val path = Path()
-                        path.moveTo(50f, 10f)  // Top point
-                        path.lineTo(60f, 25f)  // Right point
-                        path.lineTo(75f, 25f)  // Far right point
-                        path.lineTo(65f, 35f)  // Bottom right
-                        path.lineTo(70f, 50f)  // Far bottom right
-                        path.lineTo(50f, 40f)  // Bottom center
-                        path.lineTo(30f, 50f)  // Far bottom left
-                        path.lineTo(35f, 35f)  // Bottom left
-                        path.lineTo(25f, 25f)  // Far left point
-                        path.lineTo(40f, 25f)  // Left point
+                        path.moveTo(50f, 10f)
+                        path.lineTo(60f, 25f)
+                        path.lineTo(75f, 25f)
+                        path.lineTo(65f, 35f)
+                        path.lineTo(70f, 50f)
+                        path.lineTo(50f, 40f)
+                        path.lineTo(30f, 50f)
+                        path.lineTo(35f, 35f)
+                        path.lineTo(25f, 25f)
+                        path.lineTo(40f, 25f)
                         path.close()
                         canvas.drawPath(path, paint)
 
-                        // Add some decorative rings on the wand
                         paint.color = Color.rgb(220, 180, 50)
                         canvas.drawRect(40f, 45f, 60f, 50f, paint)
                         canvas.drawRect(40f, 70f, 60f, 75f, paint)
                     }
 
                     MonsterFactory.RESOURCE_POTION -> {
-                        // Potion - Bottle with liquid and bubbles
-                        // Bottle neck
-                        paint.color = Color.rgb(180, 230, 255) // Glass color
+                        paint.color = Color.rgb(180, 230, 255)
                         canvas.drawRect(40f, 20f, 60f, 40f, paint)
 
-                        // Bottle body
                         val bottlePath = Path()
-                        bottlePath.moveTo(30f, 40f)  // Top left of bottle
-                        bottlePath.lineTo(70f, 40f)  // Top right of bottle
-                        bottlePath.lineTo(65f, 90f)  // Bottom right
-                        bottlePath.lineTo(35f, 90f)  // Bottom left
+                        bottlePath.moveTo(30f, 40f)
+                        bottlePath.lineTo(70f, 40f)
+                        bottlePath.lineTo(65f, 90f)
+                        bottlePath.lineTo(35f, 90f)
                         bottlePath.close()
                         canvas.drawPath(bottlePath, paint)
 
-                        // Liquid inside
                         paint.color = resourceColors[index]
                         val liquidPath = Path()
-                        liquidPath.moveTo(35f, 60f)  // Top left of liquid
-                        liquidPath.lineTo(65f, 60f)  // Top right of liquid
-                        liquidPath.lineTo(63f, 88f)  // Bottom right
-                        liquidPath.lineTo(37f, 88f)  // Bottom left
+                        liquidPath.moveTo(35f, 60f)
+                        liquidPath.lineTo(65f, 60f)
+                        liquidPath.lineTo(63f, 88f)
+                        liquidPath.lineTo(37f, 88f)
                         liquidPath.close()
                         canvas.drawPath(liquidPath, paint)
 
-                        // Bubbles
                         paint.color = Color.WHITE
                         canvas.drawCircle(45f, 75f, 5f, paint)
                         canvas.drawCircle(55f, 65f, 3f, paint)
                         canvas.drawCircle(50f, 80f, 4f, paint)
-
-                        // Cork
                         paint.color = Color.rgb(150, 100, 50) // Brown cork
                         canvas.drawRect(42f, 15f, 58f, 22f, paint)
                     }
 
                     MonsterFactory.RESOURCE_CRYSTAL -> {
-                        // Crystal - A geometric crystal shape with facets
                         val center = 50f
                         paint.color = resourceColors[index]
 
-                        // Draw a geometrically complex crystal
                         val crystalPath = Path()
-                        crystalPath.moveTo(center, 15f)       // Top point
-                        crystalPath.lineTo(center + 15f, 35f) // Upper right
-                        crystalPath.lineTo(center + 25f, 60f) // Lower right
-                        crystalPath.lineTo(center + 10f, 85f) // Bottom right
-                        crystalPath.lineTo(center - 10f, 85f) // Bottom left
-                        crystalPath.lineTo(center - 25f, 60f) // Lower left
-                        crystalPath.lineTo(center - 15f, 35f) // Upper left
+                        crystalPath.moveTo(center, 15f)
+                        crystalPath.lineTo(center + 15f, 35f)
+                        crystalPath.lineTo(center + 25f, 60f)
+                        crystalPath.lineTo(center + 10f, 85f)
+                        crystalPath.lineTo(center - 10f, 85f)
+                        crystalPath.lineTo(center - 25f, 60f)
+                        crystalPath.lineTo(center - 15f, 35f)
                         crystalPath.close()
                         canvas.drawPath(crystalPath, paint)
 
-                        // Add internal facet lines for visual interest
                         paint.color = Color.WHITE
                         paint.style = Paint.Style.STROKE
                         paint.strokeWidth = 2f
 
-                        // Inner facet lines
                         canvas.drawLine(center, 15f, center, 85f, paint)
                         canvas.drawLine(center - 15f, 35f, center + 10f, 85f, paint)
                         canvas.drawLine(center + 15f, 35f, center - 10f, 85f, paint)
 
-                        // Reset paint style
                         paint.style = Paint.Style.FILL
 
-                        // Add a shine effect
                         paint.color = Color.argb(100, 255, 255, 255)
                         val shinePath = Path()
                         shinePath.moveTo(center - 5f, 25f)
@@ -393,20 +372,15 @@ class GameView(
                     }
 
                     MonsterFactory.RESOURCE_BOOK -> {
-                        // Book - A book with pages visible
-                        // Book cover
                         paint.color = resourceColors[index]
                         canvas.drawRect(25f, 30f, 75f, 80f, paint)
 
-                        // Book spine (darker shade)
                         paint.color = darkenColor(resourceColors[index])
                         canvas.drawRect(23f, 30f, 29f, 80f, paint)
 
-                        // Pages (white)
                         paint.color = Color.WHITE
                         canvas.drawRect(32f, 33f, 72f, 77f, paint)
 
-                        // Lines representing text
                         paint.color = Color.GRAY
                         paint.strokeWidth = 1f
                         for (i in 0 until 7) {
@@ -414,11 +388,9 @@ class GameView(
                             canvas.drawLine(35f, y, 69f, y, paint)
                         }
 
-                        // Book title (as a rectangle)
                         paint.color = Color.DKGRAY
                         canvas.drawRect(40f, 20f, 60f, 30f, paint)
 
-                        // Bookmark
                         paint.color = Color.RED
                         val bookmarkPath = Path()
                         bookmarkPath.moveTo(65f, 33f)
@@ -431,36 +403,29 @@ class GameView(
                     }
 
                     MonsterFactory.RESOURCE_SWORD -> {
-                        // Sword - A sword with handle and blade
-                        // Blade
-                        paint.color = Color.rgb(200, 200, 220) // Silver blade
+                        paint.color = Color.rgb(200, 200, 220)
                         val bladePath = Path()
-                        bladePath.moveTo(50f, 15f) // Tip
-                        bladePath.lineTo(60f, 25f) // Right edge start
-                        bladePath.lineTo(55f, 60f) // Right edge at guard
-                        bladePath.lineTo(45f, 60f) // Left edge at guard
-                        bladePath.lineTo(40f, 25f) // Left edge start
+                        bladePath.moveTo(50f, 15f)
+                        bladePath.lineTo(60f, 25f)
+                        bladePath.lineTo(55f, 60f)
+                        bladePath.lineTo(45f, 60f)
+                        bladePath.lineTo(40f, 25f)
                         bladePath.close()
                         canvas.drawPath(bladePath, paint)
 
-                        // Highlight on blade
                         paint.color = Color.WHITE
                         paint.strokeWidth = 2f
                         canvas.drawLine(50f, 17f, 50f, 58f, paint)
 
-                        // Guard
                         paint.color = Color.rgb(180, 150, 50) // Gold guard
                         canvas.drawRect(35f, 60f, 65f, 65f, paint)
 
-                        // Handle
                         paint.color = resourceColors[index]
                         canvas.drawRect(45f, 65f, 55f, 85f, paint)
 
-                        // Pommel
                         paint.color = Color.rgb(180, 150, 50) // Gold pommel
                         canvas.drawCircle(50f, 90f, 8f, paint)
 
-                        // Grip details
                         paint.color = Color.BLACK
                         paint.strokeWidth = 1f
                         for (i in 0 until 4) {
@@ -470,8 +435,6 @@ class GameView(
                     }
 
                     MonsterFactory.RESOURCE_SHIELD -> {
-                        // Shield - A medieval shield with emblem
-                        // Shield base
                         paint.color = resourceColors[index]
                         val shieldPath = Path()
                         shieldPath.moveTo(50f, 15f) // Top center
@@ -483,14 +446,12 @@ class GameView(
                         shieldPath.close()
                         canvas.drawPath(shieldPath, paint)
 
-                        // Shield border
                         paint.color = Color.rgb(150, 120, 20) // Gold border
                         paint.style = Paint.Style.STROKE
                         paint.strokeWidth = 4f
                         canvas.drawPath(shieldPath, paint)
                         paint.style = Paint.Style.FILL
 
-                        // Shield emblem (simple star)
                         paint.color = Color.WHITE
                         val emblemPath = Path()
                         val centerX = 50f
@@ -513,7 +474,6 @@ class GameView(
                         emblemPath.close()
                         canvas.drawPath(emblemPath, paint)
 
-                        // Shield bolts/rivets
                         paint.color = Color.rgb(80, 80, 80)
                         canvas.drawCircle(35f, 30f, 3f, paint)
                         canvas.drawCircle(65f, 30f, 3f, paint)
@@ -522,20 +482,15 @@ class GameView(
                     }
 
                     MonsterFactory.RESOURCE_KEY -> {
-                        // Key - An ornate key
-                        // Key handle (circle with decorative elements)
                         paint.color = resourceColors[index]
                         canvas.drawCircle(50f, 35f, 20f, paint)
 
-                        // Inner circle (hole)
                         paint.color = Color.WHITE
                         canvas.drawCircle(50f, 35f, 10f, paint)
 
-                        // Key shaft
                         paint.color = resourceColors[index]
                         canvas.drawRect(45f, 55f, 55f, 90f, paint)
 
-                        // Key teeth
                         val teethPath = Path()
                         teethPath.moveTo(55f, 75f)
                         teethPath.lineTo(65f, 75f)
@@ -547,7 +502,6 @@ class GameView(
                         teethPath.lineTo(55f, 90f)
                         canvas.drawPath(teethPath, paint)
 
-                        // Decorative elements in the handle
                         paint.color = Color.rgb(250, 220, 150)
                         for (i in 0 until 4) {
                             val angle = Math.PI / 2 * i + Math.PI / 4
@@ -558,14 +512,11 @@ class GameView(
                     }
 
                     MonsterFactory.RESOURCE_GEM -> {
-                        // Gem - A cut jewel with facets and reflections
-                        // Base gem shape (octagon)
                         paint.color = resourceColors[index]
                         val gemPath = Path()
                         val center = 50f
                         val gemSize = 30f
 
-                        // Draw octagon
                         for (i in 0 until 8) {
                             val angle = Math.PI * i / 4 + Math.PI / 8
                             val x = center + (gemSize * Math.cos(angle)).toFloat()
@@ -580,7 +531,6 @@ class GameView(
                         gemPath.close()
                         canvas.drawPath(gemPath, paint)
 
-                        // Inner facets
                         paint.color = lightenColor(resourceColors[index])
                         val innerPath = Path()
                         val innerSize = gemSize * 0.6f
@@ -599,14 +549,11 @@ class GameView(
                         innerPath.close()
                         canvas.drawPath(innerPath, paint)
 
-                        // Center
                         paint.color = Color.WHITE
                         canvas.drawCircle(center, center, innerSize * 0.5f, paint)
 
-                        // Sparkle effects
                         paint.color = Color.WHITE
 
-                        // Draw star-like sparkle
                         val sparkle = Path()
                         sparkle.moveTo(35f, 30f)
                         sparkle.lineTo(40f, 30f)
@@ -617,62 +564,52 @@ class GameView(
                         sparkle.close()
                         canvas.drawPath(sparkle, paint)
 
-                        // Small sparkles
                         canvas.drawCircle(60f, 65f, 2f, paint)
                         canvas.drawCircle(65f, 40f, 3f, paint)
                     }
 
                     MonsterFactory.RESOURCE_SCROLL -> {
-                        // Scroll - A rolled parchment with visible text
-                        // Background parchment (yellowed paper)
-                        paint.color = Color.rgb(250, 240, 200) // Parchment color
+                        paint.color = Color.rgb(250, 240, 200)
 
-                        // Draw main scroll body (slightly bent rectangle)
                         val scrollPath = Path()
                         scrollPath.moveTo(30f, 25f)
-                        scrollPath.quadTo(50f, 20f, 70f, 25f) // Top edge curved
+                        scrollPath.quadTo(50f, 20f, 70f, 25f)
                         scrollPath.lineTo(70f, 75f)
-                        scrollPath.quadTo(50f, 80f, 30f, 75f) // Bottom edge curved
+                        scrollPath.quadTo(50f, 80f, 30f, 75f)
                         scrollPath.close()
                         canvas.drawPath(scrollPath, paint)
 
-                        // Draw left roll
-                        paint.color = Color.rgb(230, 220, 180) // Slightly darker for roll
+                        paint.color = Color.rgb(230, 220, 180)
                         val leftRollPath = Path()
                         leftRollPath.moveTo(30f, 25f)
-                        leftRollPath.quadTo(25f, 50f, 30f, 75f) // Curved left edge
+                        leftRollPath.quadTo(25f, 50f, 30f, 75f)
                         leftRollPath.lineTo(35f, 75f)
-                        leftRollPath.quadTo(30f, 50f, 35f, 25f) // Inner curve
+                        leftRollPath.quadTo(30f, 50f, 35f, 25f)
                         leftRollPath.close()
                         canvas.drawPath(leftRollPath, paint)
 
-                        // Draw right roll
                         val rightRollPath = Path()
                         rightRollPath.moveTo(70f, 25f)
-                        rightRollPath.quadTo(75f, 50f, 70f, 75f) // Curved right edge
+                        rightRollPath.quadTo(75f, 50f, 70f, 75f)
                         rightRollPath.lineTo(65f, 75f)
-                        rightRollPath.quadTo(70f, 50f, 65f, 25f) // Inner curve
+                        rightRollPath.quadTo(70f, 50f, 65f, 25f)
                         rightRollPath.close()
                         canvas.drawPath(rightRollPath, paint)
 
-                        // Draw text lines
-                        paint.color = Color.rgb(80, 50, 20) // Dark brown for text
+                        paint.color = Color.rgb(80, 50, 20)
                         paint.strokeWidth = 1f
                         for (i in 0 until 6) {
                             val y = 30f + i * 8f
-                            // Create slightly wavy lines
                             val path = Path()
                             path.moveTo(40f, y)
                             path.quadTo(50f, y + 2f, 60f, y)
                             canvas.drawPath(path, paint)
                         }
 
-                        // Add wax seal
-                        paint.color = Color.rgb(180, 50, 50) // Red wax
+                        paint.color = Color.rgb(180, 50, 50)
                         canvas.drawCircle(45f, 65f, 8f, paint)
 
-                        // Add seal impression
-                        paint.color = Color.rgb(150, 30, 30) // Darker red
+                        paint.color = Color.rgb(150, 30, 30)
                         paint.style = Paint.Style.STROKE
                         paint.strokeWidth = 1f
                         canvas.drawCircle(45f, 65f, 5f, paint)
@@ -833,7 +770,7 @@ class GameView(
             val spring = Spring(
                 objectA = physicsObject,
                 objectB = anchor,
-                restLength = 0f, // Want it to return to exact position
+                restLength = 0f,
                 stiffness = 100f,
                 damping = 10f
             )
@@ -867,11 +804,10 @@ class GameView(
         monsterSize = min(screenWidth / (monstersPerRow + 1), screenHeight / 6)
         monsterSpacing = (screenWidth - (monsterSize * monstersPerRow)) / (monstersPerRow + 1)
 
-        // Position of the first row (or only row if not using double row)
         val firstRowY = if (useDoubleRow) {
-            screenHeight * 0.5f  // First row is higher up
+            screenHeight * 0.5f
         } else {
-            screenHeight * 0.6f  // Single row positioning
+            screenHeight * 0.6f
         }
 
         // Position of the second row (only used if double row)
@@ -969,9 +905,7 @@ class GameView(
         // Identify deadlock cycles (simplified for demo - just show dependencies)
         deadlockMonsters.clear()
         deadlockConnections.clear()
-        
-        // Find monsters involved in deadlock (this is simplified - in a real app, you would 
-        // use a proper deadlock detection algorithm to find cycles)
+
         val sortedMonsters = monsters.sortedBy { it.position }
         
         // Create a dependency map to find cycles
@@ -1003,8 +937,7 @@ class GameView(
                 }
             }
         }
-        
-        // Set flag to show deadlock highlight
+
         showDeadlockHighlight = true
         
         // Add particle explosion
@@ -1131,12 +1064,10 @@ class GameView(
         // Fallback to direct handling if no thread pool
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                // Find which monster was touched
                 selectedMonster = monsters.find { monster ->
                     monster.containsPoint(x, y)
                 }
 
-                // Record touch offset for smoother dragging
                 selectedMonster?.let { monster ->
                     touchOffsetX = x - monster.xPos
                     touchOffsetY = y - monster.yPos
@@ -1159,13 +1090,8 @@ class GameView(
                 selectedMonster?.let { monster ->
                     monster.isDragging = false
 
-                    // Pass both x and y coordinates to determine drop row and column
                     val newPosition = calculateDropPosition(monster, x, y)
-
-                    // Update in game logic
                     gameLogic.updateMonsterPosition(monster.id, newPosition)
-
-                    // Update our local copy
                     updateGameState(gameLogic.getMonsters())
 
                     selectedMonster = null

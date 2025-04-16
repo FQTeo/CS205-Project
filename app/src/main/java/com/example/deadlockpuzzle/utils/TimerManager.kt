@@ -108,11 +108,4 @@ class TimerManager(private val intervalManager: IntervalManager? = null) {
     fun getCurrentTime(): Int {
         return currentTimeSeconds.get()
     }
-    
-    /**
-     * Checks if the timer is currently running
-     */
-    fun isTimerRunning(): Boolean {
-        return isRunning.get()
-    }
 }

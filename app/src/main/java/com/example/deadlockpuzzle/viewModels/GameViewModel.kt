@@ -57,20 +57,6 @@ class GameViewModel : ViewModel() {
         val difficulty: GameDifficulty? = null,
         val monsters: List<Monster> = emptyList()
     )
-    
-    /**
-     * Sets the AsyncTaskManager for background processing
-     */
-    fun setAsyncTaskManager(manager: AsyncTaskManager) {
-        asyncTaskManager = manager
-    }
-    
-    /**
-     * Sets the BackgroundMessageHandler for advanced threading
-     */
-    fun setBackgroundMessageHandler(handler: BackgroundMessageHandler) {
-        backgroundMessageHandler = handler
-    }
 
     /**
      * Sets up a new game with the given difficulty
@@ -289,61 +275,12 @@ class GameViewModel : ViewModel() {
     /**
      * Performs background processing for the game
      */
-    private suspend fun performBackgroundProcessing(cycleCount: Int) {
-        // This is where you would do any continuous background work
-        // For example, AI calculations, physics simulations, etc.
-        
-        // Only log occasionally to reduce log spam
-        if (cycleCount % 20 == 0) { // Only log every 20 cycles
+    private fun performBackgroundProcessing(cycleCount: Int) {
+        if (cycleCount % 20 == 0) {
             Log.d(TAG, "Performing background processing for difficulty: ${gameStateManager.read().difficulty}")
         }
     }
-    
-    /**
-     * Gets the current game state
-     */
-    fun getGameState(): GameState {
-        return gameStateManager.read()
-    }
-    
-    /**
-     * Updates a monster's position with thread safety
-     */
-    fun updateMonsterPosition(monsterId: Int, newPosition: Int) {
-        // Use AsyncTaskManager if available
-        if (asyncTaskManager != null) {
-            asyncTaskManager?.executeAsync(
-                task = {
-                    // This runs in a background thread
-                    gameLogic.updateMonsterPosition(monsterId, newPosition)
-                    val monsters = gameLogic.getMonsters()
-                    
-                    // Update shared state
-                    gameStateManager.update({ currentState ->
-                        currentState.copy(monsters = monsters)
-                    })
-                    
-                    monsters
-                },
-                onComplete = { monsters ->
-                    // This runs on the main thread
-                    _monsters.value = monsters
-                }
-            )
-        } else {
-            // Fallback to direct update
-            gameLogic.updateMonsterPosition(monsterId, newPosition)
-            val monsters = gameLogic.getMonsters()
-            
-            // Update shared state
-            gameStateManager.update({ currentState ->
-                currentState.copy(monsters = monsters)
-            })
-            
-            _monsters.value = monsters
-        }
-    }
-    
+
     /**
      * Restores a previously saved game state
      */

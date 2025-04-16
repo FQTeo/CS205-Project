@@ -264,9 +264,8 @@ class GameLogic {
                 Log.d(TAG, "Monster ${monster.id} can complete its task, releasing resource ${monster.heldResourceId}")
             } else {
                 // Monster is blocked - cannot proceed further
-                // This means remaining monsters can't execute
                 Log.d(TAG, "Monster ${monster.id} is blocked waiting for resource ${monster.neededResourceId}")
-                return true // Deadlock detected!
+                return true // Deadlock detected
             }
         }
 

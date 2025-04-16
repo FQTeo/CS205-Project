@@ -18,7 +18,7 @@ data class Monster(
     var bitmap: Bitmap? = null,  // Monster appearance
     var isTaskCompleted: Boolean = false
 ) {
-    // Rectangle representing the monster's boundaries for drawing and touch detection
+
     val bounds = RectF()
 
     // Animation properties
@@ -97,7 +97,6 @@ data class Monster(
             }
         }
 
-        // Restore canvas state
         canvas.restore()
     }
 
@@ -105,14 +104,11 @@ data class Monster(
      * Updates monster's animation properties
      */
     fun update() {
-        // Simple animation to move toward target position (easing)
         xPos += (targetXPos - xPos) * 0.2f
         yPos += (targetYPos - yPos) * 0.2f
 
-        // Animate completed tasks
         if (isTaskCompleted) {
             scale = 1.2f
-            // Add more completion animations here
         }
     }
 
@@ -153,7 +149,6 @@ object MonsterFactory {
         RESOURCE_SWORD, RESOURCE_SHIELD, RESOURCE_KEY, RESOURCE_GEM, RESOURCE_SCROLL
     )
 
-    // Monster names for variety
     private val monsterNames = listOf(
         "Blinky", "Pinky", "Inky", "Clyde", "Spooky",
         "Fuzzy", "Grumpy", "Slimy", "Toothy", "Buggy"
@@ -197,9 +192,9 @@ object MonsterFactory {
             val heldResource = usedResources[i]
             // Create dependency pattern based on count
             val neededIndex = when {
-                count <= 3 -> (i + 1) % count // Simple circular dependency for easy
-                count <= 5 -> (i + 2) % count // Skip one for medium
-                else -> (i + 3) % count // More complex pattern for hard
+                count <= 3 -> (i + 1) % count
+                count <= 5 -> (i + 2) % count
+                else -> (i + 3) % count
             }
             val neededResource = usedResources[neededIndex]
 
@@ -220,15 +215,12 @@ object MonsterFactory {
             val breakIndex = (0 until count).random()
 
             // Always use a resource outside the chain to guarantee a solution
-            // For Hard mode (8 monsters), explicitly use the 9th resource (RESOURCE_SCROLL)
             val freeResource = if (count == GameDifficulty.HARD.monsterCount) {
-                RESOURCE_SCROLL // Explicitly use the 9th resource for Hard mode
+                RESOURCE_SCROLL
             } else {
-                // For other difficulties, use a resource outside the current set
-                resources[count] // This will be resources[3] for Easy, resources[5] for Medium
+                resources[count]
             }
 
-            // Update the selected monster to need the free resource
             monsters[breakIndex] = monsters[breakIndex].copy(
                 neededResourceId = freeResource
             )

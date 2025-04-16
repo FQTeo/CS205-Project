@@ -37,18 +37,14 @@ class SoundManager(
             .build()
     }
 
-    // For longer audio like background music
-    private var backgroundMusic: MediaPlayer? = null
-
     // Sound effect IDs
     private val soundIds = ConcurrentHashMap<Int, Int>()
     
     // Loading state
-    private val loadingLatch = CountDownLatch(2) // Wait for success and failure sounds
+    private val loadingLatch = CountDownLatch(2)
 
     // Volume controls
     private var soundEffectsVolume = 1.0f
-    private var musicVolume = 0.5f
 
     init {
         // Load sound effects
@@ -186,119 +182,5 @@ class SoundManager(
             soundPool.play(soundId, soundEffectsVolume, soundEffectsVolume, 1, 0, 1.0f)
         }
     }
-    
-    /**
-     * Plays a sound by resource ID
-     */
-    fun playSound(resourceId: Int) {
-        // Use AsyncTaskManager if available
-        if (asyncTaskManager != null) {
-            asyncTaskManager.executeAsync(
-                task = {
-                    // This runs in a background thread
-                    val soundId = soundIds[resourceId]
-                    if (soundId != null && soundId > 0) {
-                        soundPool.play(soundId, soundEffectsVolume, soundEffectsVolume, 1, 0, 1.0f)
-                    } else {
-                        // Try to load and play the sound
-                        try {
-                            val newSoundId = soundPool.load(context, resourceId, 1)
-                            soundIds[resourceId] = newSoundId
-                            
-                            // Wait for loading to complete
-                            Thread.sleep(100)
-                            
-                            soundPool.play(newSoundId, soundEffectsVolume, soundEffectsVolume, 1, 0, 1.0f)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error playing sound: $resourceId", e)
-                        }
-                    }
-                }
-            )
-        } else {
-            // Play directly
-            val soundId = soundIds[resourceId]
-            if (soundId != null && soundId > 0) {
-                soundPool.play(soundId, soundEffectsVolume, soundEffectsVolume, 1, 0, 1.0f)
-            }
-        }
-    }
-    
-    /**
-     * Plays background music
-     */
-    fun playBackgroundMusic(resourceId: Int, loop: Boolean = true) {
-        // Use AsyncTaskManager if available
-        if (asyncTaskManager != null) {
-            asyncTaskManager.executeAsync(
-                task = {
-                    // This runs in a background thread
-                    stopBackgroundMusic()
-                    
-                    try {
-                        val mediaPlayer = MediaPlayer.create(context, resourceId)
-                        mediaPlayer.setVolume(musicVolume, musicVolume)
-                        if (loop) {
-                            mediaPlayer.isLooping = true
-                        }
-                        mediaPlayer.start()
-                        backgroundMusic = mediaPlayer
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error playing background music", e)
-                    }
-                }
-            )
-        } else {
-            // Play directly
-            stopBackgroundMusic()
-            
-            try {
-                val mediaPlayer = MediaPlayer.create(context, resourceId)
-                mediaPlayer.setVolume(musicVolume, musicVolume)
-                if (loop) {
-                    mediaPlayer.isLooping = true
-                }
-                mediaPlayer.start()
-                backgroundMusic = mediaPlayer
-            } catch (e: Exception) {
-                Log.e(TAG, "Error playing background music", e)
-            }
-        }
-    }
-    
-    /**
-     * Stops background music
-     */
-    fun stopBackgroundMusic() {
-        backgroundMusic?.let { player ->
-            if (player.isPlaying) {
-                player.stop()
-            }
-            player.release()
-            backgroundMusic = null
-        }
-    }
-    
-    /**
-     * Sets the volume for sound effects
-     */
-    fun setSoundEffectsVolume(volume: Float) {
-        soundEffectsVolume = volume.coerceIn(0f, 1f)
-    }
-    
-    /**
-     * Sets the volume for background music
-     */
-    fun setMusicVolume(volume: Float) {
-        musicVolume = volume.coerceIn(0f, 1f)
-        backgroundMusic?.setVolume(musicVolume, musicVolume)
-    }
-    
-    /**
-     * Releases all resources
-     */
-    fun release() {
-        stopBackgroundMusic()
-        soundPool.release()
-    }
+
 }
