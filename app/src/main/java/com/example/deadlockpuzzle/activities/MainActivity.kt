@@ -460,47 +460,10 @@ class MainActivity : AppCompatActivity() {
                 
                 // Vibrate device
                 vibrateDevice()
-                
-                // Do NOT show timeout modal for deadlock detection
-                // Just let the deadlock visualization and the normal game results show
+
             }
         }
     }
-//
-//    private fun observeTimerUpdates() {
-//        // Observe timer updates
-//        timerManager.remainingTime.observe(this) { timeRemaining ->
-//            updateTimerDisplay(timeRemaining)
-//
-//            // Check if time ran out
-//            if (timeRemaining <= 0) {
-//                lifecycleScope.launch {
-//                    timerManager.stopTimer()
-//
-//                    // Use background message handler to process game over
-//                    backgroundMessageHandler.queueGameLogicProcessing(viewModel.gameLogic)
-//
-//                    // Show failure animation
-//                    gameView.showFailureAnimation()
-//
-//                    // Vibrate device
-//                    vibrateDevice()
-//
-//                    // Play failure sound
-//                    soundManager.playFailureSound()
-//
-//                    // Show timeout modal instead of regular game results
-//                    showTimeoutModal()
-//                }
-//            }
-//        }
-//
-//        // Observe game state changes
-//        viewModel.monsters.observe(this) { monsters ->
-//            // Update game state in GameView
-//            gameView.updateGameState(monsters)
-//        }
-//    }
 
     private fun observeTimerUpdates() {
         // Observe timer updates
@@ -536,11 +499,6 @@ class MainActivity : AppCompatActivity() {
                         // If no deadlock, show success animation and results
                         gameView.showSuccessAnimation()
 
-                        // Play success sound
-                        soundManager.playSuccessSound()
-
-                        // Show success game results
-                        showGameResults(true)
                     }
                 }
             }
@@ -717,9 +675,7 @@ class MainActivity : AppCompatActivity() {
                     // Show appropriate animation
                     if (isDeadlockFree) {
                         gameView.showSuccessAnimation()
-                        
-                        // Show success game results
-                        showGameResults(true)
+
                     } else {
                         // Show failure animation with deadlock visualization
                         gameView.showFailureAnimation()
