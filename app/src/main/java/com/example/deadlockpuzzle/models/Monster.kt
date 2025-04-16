@@ -144,11 +144,13 @@ object MonsterFactory {
     const val RESOURCE_SHIELD = 6
     const val RESOURCE_KEY = 7
     const val RESOURCE_GEM = 8
+    const val RESOURCE_SCROLL = 9
+
 
     // List of available resources
     val resources = listOf(
         RESOURCE_WAND, RESOURCE_POTION, RESOURCE_CRYSTAL, RESOURCE_BOOK,
-        RESOURCE_SWORD, RESOURCE_SHIELD, RESOURCE_KEY, RESOURCE_GEM
+        RESOURCE_SWORD, RESOURCE_SHIELD, RESOURCE_KEY, RESOURCE_GEM, RESOURCE_SCROLL
     )
 
     // Monster names for variety
@@ -178,20 +180,22 @@ object MonsterFactory {
         if (count <= 0) {
             throw IllegalArgumentException("Monster count must be positive, received: $count")
         }
-        
+
         // Make sure we have enough resources for the requested monster count
-        if (count > resources.size) {
-            throw IllegalArgumentException("Not enough resource types for $count monsters. Maximum is ${resources.size}")
+        if (count > resources.size - 1) { // Reserve at least one resource for breaking deadlocks
+            throw IllegalArgumentException("Not enough resource types for $count monsters with solution guarantee. Maximum is ${resources.size - 1}")
         }
-        
+
         val monsters = mutableListOf<Monster>()
+
+        // Create a list of resources we'll use for the monsters initially
         val usedResources = resources.take(count).toMutableList()
         usedResources.shuffle()
 
         // Create monsters with meaningful resource dependencies
         for (i in 0 until count) {
             val heldResource = usedResources[i]
-            // Create dependency pattern based on difficulty
+            // Create dependency pattern based on count
             val neededIndex = when {
                 count <= 3 -> (i + 1) % count // Simple circular dependency for easy
                 count <= 5 -> (i + 2) % count // Skip one for medium
@@ -210,27 +214,21 @@ object MonsterFactory {
             )
         }
 
-        // For easier difficulties, always ensure at least one valid solution
-        if (count <= 5 && count >= 2) {
+        // For all difficulties, always ensure at least one valid solution
+        if (count >= 2) {
             // Break one dependency in the chain
             val breakIndex = (0 until count).random()
-            // Use a resource outside the chain if available, or a random one if not
-            val freeResource = if (count < resources.size) {
-                resources[count] // Use a resource outside the chain
+
+            // Always use a resource outside the chain to guarantee a solution
+            // For Hard mode (8 monsters), explicitly use the 9th resource (RESOURCE_SCROLL)
+            val freeResource = if (count == GameDifficulty.HARD.monsterCount) {
+                RESOURCE_SCROLL // Explicitly use the 9th resource for Hard mode
             } else {
-                // In case we're using all resources, pick a random one that doesn't create a direct deadlock
-                val currentMonster = monsters[breakIndex]
-                val resourcesExcludingCurrent = resources.filter { 
-                    it != currentMonster.heldResourceId && it != currentMonster.neededResourceId 
-                }
-                if (resourcesExcludingCurrent.isNotEmpty()) {
-                    resourcesExcludingCurrent.random()
-                } else {
-                    // Last resort - just pick any resource since we can't avoid all conflicts
-                    resources.random()
-                }
+                // For other difficulties, use a resource outside the current set
+                resources[count] // This will be resources[3] for Easy, resources[5] for Medium
             }
-            
+
+            // Update the selected monster to need the free resource
             monsters[breakIndex] = monsters[breakIndex].copy(
                 neededResourceId = freeResource
             )

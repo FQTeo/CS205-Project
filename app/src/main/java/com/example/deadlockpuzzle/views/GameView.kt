@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.sin
 
@@ -275,56 +276,440 @@ class GameView(
             Color.rgb(200, 50, 200),   // Sword - Purple
             Color.rgb(50, 200, 200),   // Shield - Cyan
             Color.rgb(200, 100, 50),   // Key - Orange
-            Color.rgb(100, 50, 200)    // Gem - Violet
+            Color.rgb(100, 50, 200),   // Gem - Violet
+            Color.rgb(150, 150, 200)   // Scroll - Light Purple/Blue
         )
-        
+
         MonsterFactory.resources.forEachIndexed { index, resourceId ->
             if (index < resourceColors.size) {
                 val resourceBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(resourceBitmap)
-                
+
                 paint.color = resourceColors[index]
-                
+
                 // Draw different shapes based on resource type
                 when (resourceId) {
                     MonsterFactory.RESOURCE_WAND -> {
-                        // Wand
-                        canvas.drawRect(40f, 10f, 60f, 90f, paint)
+                        // Wand - A vertical rectangle with a star tip
+                        canvas.drawRect(40f, 30f, 60f, 90f, paint)
+
+                        // Star tip
                         paint.color = Color.YELLOW
-                        canvas.drawCircle(50f, 20f, 15f, paint)
+                        val path = Path()
+                        path.moveTo(50f, 10f)  // Top point
+                        path.lineTo(60f, 25f)  // Right point
+                        path.lineTo(75f, 25f)  // Far right point
+                        path.lineTo(65f, 35f)  // Bottom right
+                        path.lineTo(70f, 50f)  // Far bottom right
+                        path.lineTo(50f, 40f)  // Bottom center
+                        path.lineTo(30f, 50f)  // Far bottom left
+                        path.lineTo(35f, 35f)  // Bottom left
+                        path.lineTo(25f, 25f)  // Far left point
+                        path.lineTo(40f, 25f)  // Left point
+                        path.close()
+                        canvas.drawPath(path, paint)
+
+                        // Add some decorative rings on the wand
+                        paint.color = Color.rgb(220, 180, 50)
+                        canvas.drawRect(40f, 45f, 60f, 50f, paint)
+                        canvas.drawRect(40f, 70f, 60f, 75f, paint)
                     }
+
                     MonsterFactory.RESOURCE_POTION -> {
-                        // Potion
-                        paint.color = resourceColors[index]
-                        canvas.drawRect(30f, 40f, 70f, 90f, paint)
+                        // Potion - Bottle with liquid and bubbles
+                        // Bottle neck
+                        paint.color = Color.rgb(180, 230, 255) // Glass color
                         canvas.drawRect(40f, 20f, 60f, 40f, paint)
+
+                        // Bottle body
+                        val bottlePath = Path()
+                        bottlePath.moveTo(30f, 40f)  // Top left of bottle
+                        bottlePath.lineTo(70f, 40f)  // Top right of bottle
+                        bottlePath.lineTo(65f, 90f)  // Bottom right
+                        bottlePath.lineTo(35f, 90f)  // Bottom left
+                        bottlePath.close()
+                        canvas.drawPath(bottlePath, paint)
+
+                        // Liquid inside
+                        paint.color = resourceColors[index]
+                        val liquidPath = Path()
+                        liquidPath.moveTo(35f, 60f)  // Top left of liquid
+                        liquidPath.lineTo(65f, 60f)  // Top right of liquid
+                        liquidPath.lineTo(63f, 88f)  // Bottom right
+                        liquidPath.lineTo(37f, 88f)  // Bottom left
+                        liquidPath.close()
+                        canvas.drawPath(liquidPath, paint)
+
+                        // Bubbles
+                        paint.color = Color.WHITE
+                        canvas.drawCircle(45f, 75f, 5f, paint)
+                        canvas.drawCircle(55f, 65f, 3f, paint)
+                        canvas.drawCircle(50f, 80f, 4f, paint)
+
+                        // Cork
+                        paint.color = Color.rgb(150, 100, 50) // Brown cork
+                        canvas.drawRect(42f, 15f, 58f, 22f, paint)
                     }
+
                     MonsterFactory.RESOURCE_CRYSTAL -> {
-                        // Crystal
-                        val points = floatArrayOf(
-                            50f, 10f,
-                            80f, 40f,
-                            65f, 90f,
-                            35f, 90f,
-                            20f, 40f
-                        )
-                        for (i in 0 until 5) {
-                            canvas.drawLine(
-                                points[i * 2], points[i * 2 + 1],
-                                points[(i * 2 + 2) % 10], points[(i * 2 + 3) % 10],
-                                paint
-                            )
+                        // Crystal - A geometric crystal shape with facets
+                        val center = 50f
+                        paint.color = resourceColors[index]
+
+                        // Draw a geometrically complex crystal
+                        val crystalPath = Path()
+                        crystalPath.moveTo(center, 15f)       // Top point
+                        crystalPath.lineTo(center + 15f, 35f) // Upper right
+                        crystalPath.lineTo(center + 25f, 60f) // Lower right
+                        crystalPath.lineTo(center + 10f, 85f) // Bottom right
+                        crystalPath.lineTo(center - 10f, 85f) // Bottom left
+                        crystalPath.lineTo(center - 25f, 60f) // Lower left
+                        crystalPath.lineTo(center - 15f, 35f) // Upper left
+                        crystalPath.close()
+                        canvas.drawPath(crystalPath, paint)
+
+                        // Add internal facet lines for visual interest
+                        paint.color = Color.WHITE
+                        paint.style = Paint.Style.STROKE
+                        paint.strokeWidth = 2f
+
+                        // Inner facet lines
+                        canvas.drawLine(center, 15f, center, 85f, paint)
+                        canvas.drawLine(center - 15f, 35f, center + 10f, 85f, paint)
+                        canvas.drawLine(center + 15f, 35f, center - 10f, 85f, paint)
+
+                        // Reset paint style
+                        paint.style = Paint.Style.FILL
+
+                        // Add a shine effect
+                        paint.color = Color.argb(100, 255, 255, 255)
+                        val shinePath = Path()
+                        shinePath.moveTo(center - 5f, 25f)
+                        shinePath.lineTo(center + 8f, 40f)
+                        shinePath.lineTo(center + 2f, 55f)
+                        shinePath.lineTo(center - 10f, 35f)
+                        shinePath.close()
+                        canvas.drawPath(shinePath, paint)
+                    }
+
+                    MonsterFactory.RESOURCE_BOOK -> {
+                        // Book - A book with pages visible
+                        // Book cover
+                        paint.color = resourceColors[index]
+                        canvas.drawRect(25f, 30f, 75f, 80f, paint)
+
+                        // Book spine (darker shade)
+                        paint.color = darkenColor(resourceColors[index])
+                        canvas.drawRect(23f, 30f, 29f, 80f, paint)
+
+                        // Pages (white)
+                        paint.color = Color.WHITE
+                        canvas.drawRect(32f, 33f, 72f, 77f, paint)
+
+                        // Lines representing text
+                        paint.color = Color.GRAY
+                        paint.strokeWidth = 1f
+                        for (i in 0 until 7) {
+                            val y = 40f + i * 5f
+                            canvas.drawLine(35f, y, 69f, y, paint)
+                        }
+
+                        // Book title (as a rectangle)
+                        paint.color = Color.DKGRAY
+                        canvas.drawRect(40f, 20f, 60f, 30f, paint)
+
+                        // Bookmark
+                        paint.color = Color.RED
+                        val bookmarkPath = Path()
+                        bookmarkPath.moveTo(65f, 33f)
+                        bookmarkPath.lineTo(70f, 33f)
+                        bookmarkPath.lineTo(70f, 45f)
+                        bookmarkPath.lineTo(67.5f, 42f)
+                        bookmarkPath.lineTo(65f, 45f)
+                        bookmarkPath.close()
+                        canvas.drawPath(bookmarkPath, paint)
+                    }
+
+                    MonsterFactory.RESOURCE_SWORD -> {
+                        // Sword - A sword with handle and blade
+                        // Blade
+                        paint.color = Color.rgb(200, 200, 220) // Silver blade
+                        val bladePath = Path()
+                        bladePath.moveTo(50f, 15f) // Tip
+                        bladePath.lineTo(60f, 25f) // Right edge start
+                        bladePath.lineTo(55f, 60f) // Right edge at guard
+                        bladePath.lineTo(45f, 60f) // Left edge at guard
+                        bladePath.lineTo(40f, 25f) // Left edge start
+                        bladePath.close()
+                        canvas.drawPath(bladePath, paint)
+
+                        // Highlight on blade
+                        paint.color = Color.WHITE
+                        paint.strokeWidth = 2f
+                        canvas.drawLine(50f, 17f, 50f, 58f, paint)
+
+                        // Guard
+                        paint.color = Color.rgb(180, 150, 50) // Gold guard
+                        canvas.drawRect(35f, 60f, 65f, 65f, paint)
+
+                        // Handle
+                        paint.color = resourceColors[index]
+                        canvas.drawRect(45f, 65f, 55f, 85f, paint)
+
+                        // Pommel
+                        paint.color = Color.rgb(180, 150, 50) // Gold pommel
+                        canvas.drawCircle(50f, 90f, 8f, paint)
+
+                        // Grip details
+                        paint.color = Color.BLACK
+                        paint.strokeWidth = 1f
+                        for (i in 0 until 4) {
+                            val y = 68f + i * 5f
+                            canvas.drawLine(45f, y, 55f, y, paint)
                         }
                     }
+
+                    MonsterFactory.RESOURCE_SHIELD -> {
+                        // Shield - A medieval shield with emblem
+                        // Shield base
+                        paint.color = resourceColors[index]
+                        val shieldPath = Path()
+                        shieldPath.moveTo(50f, 15f) // Top center
+                        shieldPath.lineTo(75f, 25f) // Top right
+                        shieldPath.lineTo(70f, 60f) // Middle right
+                        shieldPath.lineTo(50f, 85f) // Bottom point
+                        shieldPath.lineTo(30f, 60f) // Middle left
+                        shieldPath.lineTo(25f, 25f) // Top left
+                        shieldPath.close()
+                        canvas.drawPath(shieldPath, paint)
+
+                        // Shield border
+                        paint.color = Color.rgb(150, 120, 20) // Gold border
+                        paint.style = Paint.Style.STROKE
+                        paint.strokeWidth = 4f
+                        canvas.drawPath(shieldPath, paint)
+                        paint.style = Paint.Style.FILL
+
+                        // Shield emblem (simple star)
+                        paint.color = Color.WHITE
+                        val emblemPath = Path()
+                        val centerX = 50f
+                        val centerY = 45f
+                        val outerRadius = 15f
+                        val innerRadius = 7f
+
+                        for (i in 0 until 10) {
+                            val angle = Math.PI * 2 * i / 10
+                            val radius = if (i % 2 == 0) outerRadius else innerRadius
+                            val x = centerX + (radius * Math.cos(angle)).toFloat()
+                            val y = centerY + (radius * Math.sin(angle)).toFloat()
+
+                            if (i == 0) {
+                                emblemPath.moveTo(x, y)
+                            } else {
+                                emblemPath.lineTo(x, y)
+                            }
+                        }
+                        emblemPath.close()
+                        canvas.drawPath(emblemPath, paint)
+
+                        // Shield bolts/rivets
+                        paint.color = Color.rgb(80, 80, 80)
+                        canvas.drawCircle(35f, 30f, 3f, paint)
+                        canvas.drawCircle(65f, 30f, 3f, paint)
+                        canvas.drawCircle(30f, 50f, 3f, paint)
+                        canvas.drawCircle(70f, 50f, 3f, paint)
+                    }
+
+                    MonsterFactory.RESOURCE_KEY -> {
+                        // Key - An ornate key
+                        // Key handle (circle with decorative elements)
+                        paint.color = resourceColors[index]
+                        canvas.drawCircle(50f, 35f, 20f, paint)
+
+                        // Inner circle (hole)
+                        paint.color = Color.WHITE
+                        canvas.drawCircle(50f, 35f, 10f, paint)
+
+                        // Key shaft
+                        paint.color = resourceColors[index]
+                        canvas.drawRect(45f, 55f, 55f, 90f, paint)
+
+                        // Key teeth
+                        val teethPath = Path()
+                        teethPath.moveTo(55f, 75f)
+                        teethPath.lineTo(65f, 75f)
+                        teethPath.lineTo(65f, 80f)
+                        teethPath.lineTo(55f, 80f)
+                        teethPath.moveTo(55f, 85f)
+                        teethPath.lineTo(70f, 85f)
+                        teethPath.lineTo(70f, 90f)
+                        teethPath.lineTo(55f, 90f)
+                        canvas.drawPath(teethPath, paint)
+
+                        // Decorative elements in the handle
+                        paint.color = Color.rgb(250, 220, 150)
+                        for (i in 0 until 4) {
+                            val angle = Math.PI / 2 * i + Math.PI / 4
+                            val x = 50f + (12f * Math.cos(angle)).toFloat()
+                            val y = 35f + (12f * Math.sin(angle)).toFloat()
+                            canvas.drawCircle(x, y, 3f, paint)
+                        }
+                    }
+
+                    MonsterFactory.RESOURCE_GEM -> {
+                        // Gem - A cut jewel with facets and reflections
+                        // Base gem shape (octagon)
+                        paint.color = resourceColors[index]
+                        val gemPath = Path()
+                        val center = 50f
+                        val gemSize = 30f
+
+                        // Draw octagon
+                        for (i in 0 until 8) {
+                            val angle = Math.PI * i / 4 + Math.PI / 8
+                            val x = center + (gemSize * Math.cos(angle)).toFloat()
+                            val y = center + (gemSize * Math.sin(angle)).toFloat()
+
+                            if (i == 0) {
+                                gemPath.moveTo(x, y)
+                            } else {
+                                gemPath.lineTo(x, y)
+                            }
+                        }
+                        gemPath.close()
+                        canvas.drawPath(gemPath, paint)
+
+                        // Inner facets
+                        paint.color = lightenColor(resourceColors[index])
+                        val innerPath = Path()
+                        val innerSize = gemSize * 0.6f
+
+                        for (i in 0 until 8) {
+                            val angle = Math.PI * i / 4 + Math.PI / 8
+                            val x = center + (innerSize * Math.cos(angle)).toFloat()
+                            val y = center + (innerSize * Math.sin(angle)).toFloat()
+
+                            if (i == 0) {
+                                innerPath.moveTo(x, y)
+                            } else {
+                                innerPath.lineTo(x, y)
+                            }
+                        }
+                        innerPath.close()
+                        canvas.drawPath(innerPath, paint)
+
+                        // Center
+                        paint.color = Color.WHITE
+                        canvas.drawCircle(center, center, innerSize * 0.5f, paint)
+
+                        // Sparkle effects
+                        paint.color = Color.WHITE
+
+                        // Draw star-like sparkle
+                        val sparkle = Path()
+                        sparkle.moveTo(35f, 30f)
+                        sparkle.lineTo(40f, 30f)
+                        sparkle.lineTo(40f, 25f)
+                        sparkle.lineTo(45f, 30f)
+                        sparkle.lineTo(40f, 35f)
+                        sparkle.lineTo(40f, 30f)
+                        sparkle.close()
+                        canvas.drawPath(sparkle, paint)
+
+                        // Small sparkles
+                        canvas.drawCircle(60f, 65f, 2f, paint)
+                        canvas.drawCircle(65f, 40f, 3f, paint)
+                    }
+
+                    MonsterFactory.RESOURCE_SCROLL -> {
+                        // Scroll - A rolled parchment with visible text
+                        // Background parchment (yellowed paper)
+                        paint.color = Color.rgb(250, 240, 200) // Parchment color
+
+                        // Draw main scroll body (slightly bent rectangle)
+                        val scrollPath = Path()
+                        scrollPath.moveTo(30f, 25f)
+                        scrollPath.quadTo(50f, 20f, 70f, 25f) // Top edge curved
+                        scrollPath.lineTo(70f, 75f)
+                        scrollPath.quadTo(50f, 80f, 30f, 75f) // Bottom edge curved
+                        scrollPath.close()
+                        canvas.drawPath(scrollPath, paint)
+
+                        // Draw left roll
+                        paint.color = Color.rgb(230, 220, 180) // Slightly darker for roll
+                        val leftRollPath = Path()
+                        leftRollPath.moveTo(30f, 25f)
+                        leftRollPath.quadTo(25f, 50f, 30f, 75f) // Curved left edge
+                        leftRollPath.lineTo(35f, 75f)
+                        leftRollPath.quadTo(30f, 50f, 35f, 25f) // Inner curve
+                        leftRollPath.close()
+                        canvas.drawPath(leftRollPath, paint)
+
+                        // Draw right roll
+                        val rightRollPath = Path()
+                        rightRollPath.moveTo(70f, 25f)
+                        rightRollPath.quadTo(75f, 50f, 70f, 75f) // Curved right edge
+                        rightRollPath.lineTo(65f, 75f)
+                        rightRollPath.quadTo(70f, 50f, 65f, 25f) // Inner curve
+                        rightRollPath.close()
+                        canvas.drawPath(rightRollPath, paint)
+
+                        // Draw text lines
+                        paint.color = Color.rgb(80, 50, 20) // Dark brown for text
+                        paint.strokeWidth = 1f
+                        for (i in 0 until 6) {
+                            val y = 30f + i * 8f
+                            // Create slightly wavy lines
+                            val path = Path()
+                            path.moveTo(40f, y)
+                            path.quadTo(50f, y + 2f, 60f, y)
+                            canvas.drawPath(path, paint)
+                        }
+
+                        // Add wax seal
+                        paint.color = Color.rgb(180, 50, 50) // Red wax
+                        canvas.drawCircle(45f, 65f, 8f, paint)
+
+                        // Add seal impression
+                        paint.color = Color.rgb(150, 30, 30) // Darker red
+                        paint.style = Paint.Style.STROKE
+                        paint.strokeWidth = 1f
+                        canvas.drawCircle(45f, 65f, 5f, paint)
+                        canvas.drawLine(41f, 65f, 49f, 65f, paint)
+                        canvas.drawLine(45f, 61f, 45f, 69f, paint)
+                        paint.style = Paint.Style.FILL
+                    }
+
                     else -> {
-                        // Default shape for other resources
+                        // Default circular shape for any other resources
+                        paint.color = resourceColors[index % resourceColors.size]
                         canvas.drawCircle(50f, 50f, 40f, paint)
                     }
                 }
-                
+
                 resourceBitmaps[resourceId] = resourceBitmap
             }
         }
+    }
+
+    // Helper functions to manipulate colors
+    private fun darkenColor(color: Int): Int {
+        val factor = 0.7f
+        val a = Color.alpha(color)
+        val r = (Color.red(color) * factor).toInt()
+        val g = (Color.green(color) * factor).toInt()
+        val b = (Color.blue(color) * factor).toInt()
+        return Color.argb(a, r, g, b)
+    }
+
+    private fun lightenColor(color: Int): Int {
+        val factor = 1.3f
+        val a = Color.alpha(color)
+        val r = (Color.red(color) * factor).coerceAtMost(255f).toInt()
+        val g = (Color.green(color) * factor).coerceAtMost(255f).toInt()
+        val b = (Color.blue(color) * factor).coerceAtMost(255f).toInt()
+        return Color.argb(a, r, g, b)
     }
     
     /**
@@ -455,44 +840,87 @@ class GameView(
             physicsSystem.addSpring(spring)
         }
     }
-    
+
     /**
      * Calculates the positions of all monsters based on screen size
+     * Arranges monsters in two rows when there are more than 5 monsters
      */
     private fun calculateMonsterPositions() {
         val screenWidth = width.toFloat()
         val screenHeight = height.toFloat()
-        
+
         // Calculate monster size based on screen width and count
         val difficulty = gameLogic.getDifficulty()
-        val count = difficulty.monsterCount
-        
-        monsterSize = min(screenWidth / (count + 1), screenHeight / 5)
-        monsterSpacing = (screenWidth - (monsterSize * count)) / (count + 1)
-        
-        // Position monsters in a row at the bottom of the screen
-        startY = screenHeight * 0.6f
-        
+        val totalCount = difficulty.monsterCount
+
+        // Determine if we need two rows (when there are more than 5 monsters)
+        val useDoubleRow = totalCount > 5
+
+        // Calculate how many monsters per row
+        val monstersPerRow = if (useDoubleRow) {
+            ceil(totalCount / 2.0).toInt()
+        } else {
+            totalCount
+        }
+
+        // Calculate monster size and spacing
+        monsterSize = min(screenWidth / (monstersPerRow + 1), screenHeight / 6)
+        monsterSpacing = (screenWidth - (monsterSize * monstersPerRow)) / (monstersPerRow + 1)
+
+        // Position of the first row (or only row if not using double row)
+        val firstRowY = if (useDoubleRow) {
+            screenHeight * 0.5f  // First row is higher up
+        } else {
+            screenHeight * 0.6f  // Single row positioning
+        }
+
+        // Position of the second row (only used if double row)
+        val secondRowY = screenHeight * 0.7f
+
         monsters.forEach { monster ->
             val position = monster.position
-            val x = monsterSpacing + position * (monsterSize + monsterSpacing)
-            val y = startY
-            
-            monster.targetXPos = x
-            monster.targetYPos = y
-            
-            // Always force position updates to avoid initial placement issues
-            monster.xPos = x
-            monster.yPos = y
-            
+
+            if (useDoubleRow) {
+                // Use two rows
+                if (position < monstersPerRow) {
+                    // First row
+                    val x = monsterSpacing + position * (monsterSize + monsterSpacing)
+                    val y = firstRowY
+
+                    monster.targetXPos = x
+                    monster.targetYPos = y
+                    monster.xPos = x
+                    monster.yPos = y
+                } else {
+                    // Second row
+                    val adjustedPosition = position - monstersPerRow
+                    val x = monsterSpacing + adjustedPosition * (monsterSize + monsterSpacing)
+                    val y = secondRowY
+
+                    monster.targetXPos = x
+                    monster.targetYPos = y
+                    monster.xPos = x
+                    monster.yPos = y
+                }
+            } else {
+                // Single row layout (original)
+                val x = monsterSpacing + position * (monsterSize + monsterSpacing)
+                val y = firstRowY
+
+                monster.targetXPos = x
+                monster.targetYPos = y
+                monster.xPos = x
+                monster.yPos = y
+            }
+
             // Set proper bounds for the monster
             monster.setBounds(0f, 0f, monsterSize, monsterSize)
         }
-        
+
         // Reset the physics system
         updatePhysicsObjects()
     }
-    
+
     /**
      * Displays a success animation with enhanced effects
      */
@@ -626,16 +1054,16 @@ class GameView(
             }
         }
     }
-    
+
     /**
      * Handles touch events for drag and drop with thread pool
      */
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (gameLogic.isGameCompleted()) return false
-        
+
         val x = event.x
         val y = event.y
-        
+
         // Process using the interaction thread pool if available
         interactionThreadPool?.let { pool ->
             when (event.action) {
@@ -645,7 +1073,7 @@ class GameView(
                         task = {
                             // Find which monster was touched
                             val monster = monsters.find { it.containsPoint(x, y) }
-                            
+
                             monster?.let {
                                 touchOffsetX = x - it.xPos
                                 touchOffsetY = y - it.yPos
@@ -658,11 +1086,11 @@ class GameView(
                             result as Boolean
                         }
                     )
-                    
+
                     // If we found a monster to select, return true
                     return selectedMonster != null
                 }
-                
+
                 MotionEvent.ACTION_MOVE -> {
                     // Update position while dragging
                     selectedMonster?.let { monster ->
@@ -671,35 +1099,35 @@ class GameView(
                         return true
                     }
                 }
-                
+
                 MotionEvent.ACTION_UP -> {
                     // Handle drop in thread pool
                     selectedMonster?.let { monster ->
                         pool.processInteraction {
                             monster.isDragging = false
-                            
-                            // Determine new position based on drop location
-                            val newPosition = calculateDropPosition(monster, x)
-                            
+
+                            // Pass both x and y coordinates to determine row and column
+                            val newPosition = calculateDropPosition(monster, x, y)
+
                             // Update in game logic
                             gameLogic.updateMonsterPosition(monster.id, newPosition)
-                            
+
                             // Update our local copy
                             val updatedMonsters = gameLogic.getMonsters()
                             post {
                                 updateGameState(updatedMonsters)
                             }
-                            
+
                             selectedMonster = null
                         }
                         return true
                     }
                 }
             }
-            
+
             return false
         }
-        
+
         // Fallback to direct handling if no thread pool
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -707,7 +1135,7 @@ class GameView(
                 selectedMonster = monsters.find { monster ->
                     monster.containsPoint(x, y)
                 }
-                
+
                 // Record touch offset for smoother dragging
                 selectedMonster?.let { monster ->
                     touchOffsetX = x - monster.xPos
@@ -716,7 +1144,7 @@ class GameView(
                     return true
                 }
             }
-            
+
             MotionEvent.ACTION_MOVE -> {
                 // Update position while dragging
                 selectedMonster?.let { monster ->
@@ -725,43 +1153,68 @@ class GameView(
                     return true
                 }
             }
-            
+
             MotionEvent.ACTION_UP -> {
                 // Handle drop
                 selectedMonster?.let { monster ->
                     monster.isDragging = false
-                    
-                    // Determine new position based on drop location
-                    val newPosition = calculateDropPosition(monster, x)
-                    
+
+                    // Pass both x and y coordinates to determine drop row and column
+                    val newPosition = calculateDropPosition(monster, x, y)
+
                     // Update in game logic
                     gameLogic.updateMonsterPosition(monster.id, newPosition)
-                    
+
                     // Update our local copy
                     updateGameState(gameLogic.getMonsters())
-                    
+
                     selectedMonster = null
                     return true
                 }
             }
         }
-        
+
         return false
     }
-    
+
     /**
      * Calculates the new position for a monster being dropped
+     * Handles both single-row and double-row layouts with proper row switching
      */
-    private fun calculateDropPosition(monster: Monster, dropX: Float): Int {
+    private fun calculateDropPosition(monster: Monster, dropX: Float, dropY: Float): Int {
         val count = monsters.size
-        
-        // Calculate which slot the monster was dropped in
+
+        // Determine if we're using double row
+        val useDoubleRow = count > 5
+        val monstersPerRow = if (useDoubleRow) {
+            ceil(count / 2.0).toInt()
+        } else {
+            count
+        }
+
+        // Calculate which slot the monster was dropped in horizontally
         val slotWidth = monsterSize + monsterSpacing
         val adjustedX = (dropX - monsterSpacing / 2) / slotWidth
-        
-        return adjustedX.toInt().coerceIn(0, count - 1)
+        val slotPosition = adjustedX.toInt().coerceIn(0, monstersPerRow - 1)
+
+        // If we're using double row, determine which row it was dropped in based on Y position
+        if (useDoubleRow) {
+            val screenHeight = height.toFloat()
+            val firstRowY = screenHeight * 0.5f
+            val secondRowY = screenHeight * 0.7f
+
+            // Calculate middle point between rows to determine drop row
+            val midPoint = (firstRowY + secondRowY) / 2
+
+            // If dropped in second row, adjust the position
+            if (dropY > midPoint) {
+                return monstersPerRow + slotPosition
+            }
+        }
+
+        return slotPosition
     }
-    
+
     /**
      * Updates monsters with physics system positions
      */
