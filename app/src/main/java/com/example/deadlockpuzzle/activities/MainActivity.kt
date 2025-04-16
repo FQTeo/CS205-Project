@@ -126,6 +126,9 @@ class MainActivity : AppCompatActivity() {
         
         // Show difficulty selection initially
         showDifficultySelection()
+
+        // Set up instructions
+        setupInstructionsButton()
     }
     
     /**
@@ -1258,6 +1261,20 @@ class MainActivity : AppCompatActivity() {
             listOf(R.id.easy_button, R.id.medium_button, R.id.hard_button).forEach {
                 findViewById<Button>(it).isEnabled = true
             }
+        }
+    }
+
+    private fun setupInstructionsButton() {
+        val instructionsButton = findViewById<View>(R.id.instructions_button)
+        val instructionsModal = findViewById<View>(R.id.instructions_modal)
+        val closeInstructionsButton = findViewById<Button>(R.id.close_instructions_button)
+
+        instructionsButton.setOnClickListener {
+            instructionsModal.visibility = View.VISIBLE
+        }
+
+        closeInstructionsButton.setOnClickListener {
+            instructionsModal.visibility = View.GONE
         }
     }
 }

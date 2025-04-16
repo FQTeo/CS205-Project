@@ -7,6 +7,43 @@
     android:background="@color/background_color"
     tools:context="com.example.deadlockpuzzle.activities.MainActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:layout_centerHorizontal="true"/>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/instructions_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/primary"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="?"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:fontFamily="sans-serif-condensed-medium"/>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
+
     <!-- Difficulty Selection Screen -->
     <LinearLayout
         android:id="@+id/difficulty_layout"
@@ -358,4 +395,65 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/instructions_modal"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="@color/white"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="How to Play"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_dark"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rearrange the monsters to prevent deadlock. Each monster holds a resource and needs another to complete its task. Avoid circular dependencies to solve the puzzle!"
+                android:textSize="16sp"
+                android:textColor="@color/text_color"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• The icon on top of each monster shows the resource it holds."
+                android:textSize="16sp"
+                android:textColor="@color/text_color"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• The bubble above shows the resource it needs."
+                android:textSize="16sp"
+                android:textColor="@color/text_color"
+                android:layout_marginBottom="16dp"/>
+
+            <Button
+                android:id="@+id/close_instructions_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Got it!"
+                android:textSize="16sp"
+                android:backgroundTint="@color/button_primary"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </FrameLayout>
